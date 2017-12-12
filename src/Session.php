@@ -8,22 +8,22 @@
 
 namespace Geggleto\Middleware;
 
-
+use SessionHandlerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 class Session
 {
-    public function __construct ($name = 'default')
+    /**
+     * Store the session handler
+     *
+     * @var object
+     */
+    protected $session;
+
+    public function __construct (SessionHandlerInterface $session)
     {
-        if (!isset($_SESSION)) {
-            if (php_sapi_name() == "cli") {
-                $_SESSION = [];
-            } else {
-                session_name($name);
-                session_start();
-            }
-        }
+        $this->session = $session;
     }
 
     /**
@@ -37,7 +37,7 @@ class Session
         ResponseInterface $response,
         callable $next) {
 
-        foreach ($_SESSION as $k => $value) {
+        foreach ($this->session as $k => $value) {
             $requestInterface = $requestInterface->withAttribute($k, $value);
         }
 
